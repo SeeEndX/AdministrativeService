@@ -17,7 +17,7 @@ namespace AdminService
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new Service1()
+                new AdministrativeService()
             };
             ServiceBase.Run(ServicesToRun);
         }

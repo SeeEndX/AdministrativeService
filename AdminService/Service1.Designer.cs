@@ -1,6 +1,6 @@
 ﻿namespace AdminService
 {
-    partial class Service1
+    partial class AdministrativeService
     {
         /// <summary> 
         /// Обязательная переменная конструктора.

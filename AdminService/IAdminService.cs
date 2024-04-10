@@ -5,6 +5,7 @@ using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.Serialization;
+using System.Data;
 
 
 namespace AdminService
@@ -14,6 +15,27 @@ namespace AdminService
     {
         [OperationContract]
         User Authenticate(string login, string password);
+
+        [OperationContract]
+        DataTable GetUsersData();
+
+        [OperationContract]
+        int AddUser(string username, string password);
+
+        [OperationContract]
+        void EditUser(string oldUsername, string newUsername);
+
+        [OperationContract]
+        void DeleteUser(int userId);
+
+        [OperationContract]
+        int GetSelectedUserId(string newUsername);
+
+        [OperationContract]
+        void UpdatePass(int userId, string newPassword);
+
+        [OperationContract]
+        List<string> GetFunctions(int userId, string newPassword);
     }
 
     [DataContract]
