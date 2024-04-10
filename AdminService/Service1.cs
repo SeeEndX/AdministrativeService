@@ -44,6 +44,12 @@ namespace AdminService
         {
             User user;
             private string cs = "server=localhost;user=root;database=admintooldb;password=1234;";
+            public event EventHandler DataAdded;
+
+            protected virtual void OnDataAdded()
+            {
+                DataAdded?.Invoke(this, EventArgs.Empty);
+            }
 
             public User Authenticate(string login, string password)
             {
@@ -80,7 +86,9 @@ namespace AdminService
                 using (MySqlConnection connection = new MySqlConnection(cs))
                 {
                     string cmdText = @"
-            SELECT Users.id AS `id`, Users.login AS `Пользователь`, GROUP_CONCAT(`Function`.name, ', ') AS `Доступные функции`
+            SELECT Users.id AS `id`, 
+	            Users.login AS `Пользователь`, 
+                GROUP_CONCAT(DISTINCT `Function`.name SEPARATOR ', ') AS `Доступные функции`
             FROM Users
             LEFT JOIN Function_users ON Users.id = Function_users.user
             LEFT JOIN `Function` ON `Function`.id = Function_users.function
@@ -125,6 +133,7 @@ namespace AdminService
                             userAdded = command.ExecuteNonQuery();
                         }
                         connection.Close();
+                        OnDataAdded();
                         return userAdded;
                     }
                 }
@@ -223,12 +232,183 @@ namespace AdminService
                             cmd.ExecuteNonQuery();
                         }
                         con.Close();
+                        OnDataAdded();
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Ошибка - ", ex.Message);
                 }
+            }
+
+            public bool IsUserExists(string login)
+            {
+                int userCount = 0;
+                try
+                {
+                    using (MySqlConnection con = new MySqlConnection(cs))
+                    {
+                        con.Open();
+                        string cmdText = "SELECT COUNT(*) FROM Users WHERE login = @Login";
+                        using (MySqlCommand cmd = new MySqlCommand(cmdText, con))
+                        {
+                            cmd.Parameters.AddWithValue("@Login", login);
+                            userCount = Convert.ToInt32(cmd.ExecuteScalar());
+                        }
+                        con.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Ошибка - ", ex.Message);
+                }
+                return userCount > 0;
+            }
+
+            public List<string> GetFunctions()
+            {
+                List<string> allFunctions = new List<string>();
+
+                try
+                {
+                    using (MySqlConnection con = new MySqlConnection(cs))
+                    {
+                        con.Open();
+                        string query = "SELECT name FROM Function;";
+                        using (MySqlCommand cmd = new MySqlCommand(query, con))
+                        {
+                            using (MySqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    string functionName = reader.GetString(0);
+                                    allFunctions.Add(functionName);
+                                }
+                            }
+                        }
+                        con.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Ошибка - ", ex.Message);
+                }
+
+                return allFunctions;
+            }
+
+            public List<string> GetAllFunctionNames()
+            {
+                List<string> allFunctionNames = new List<string>();
+
+                using (MySqlConnection connection = new MySqlConnection(cs))
+                {
+                    string query = "SELECT name FROM `Function`";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        connection.Open();
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                allFunctionNames.Add(reader.GetString(0));
+                            }
+                        }
+                    }
+                }
+
+                return allFunctionNames;
+            }
+
+            public List<string> GetAssignedFunctionNames(string username)
+            {
+                List<string> assignedFunctionNames = new List<string>();
+
+                using (MySqlConnection connection = new MySqlConnection(cs))
+                {
+                    string query = @"SELECT f.name 
+                             FROM Function_users fu
+                             INNER JOIN Users u ON fu.user = u.id
+                             INNER JOIN `Function` f ON fu.`function` = f.id
+                             WHERE u.login = @Username";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@Username", username);
+                        connection.Open();
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                assignedFunctionNames.Add(reader.GetString(0));
+                            }
+                        }
+                    }
+                }
+
+                return assignedFunctionNames;
+            }
+
+            public void SaveAssignedFunctions(string username, List<string> selectedFunctionNames)
+            {
+                using (MySqlConnection connection = new MySqlConnection(cs))
+                {
+                    connection.Open();
+                    int userId = GetUserIdByUsername(username, connection);
+
+                    string deleteQuery = "DELETE FROM Function_users WHERE user = @UserId";
+                    using (MySqlCommand deleteCommand = new MySqlCommand(deleteQuery, connection))
+                    {
+                        deleteCommand.Parameters.AddWithValue("@UserId", userId);
+                        deleteCommand.ExecuteNonQuery();
+                    }
+
+                    string insertQuery = "INSERT INTO Function_users (user, `function`) VALUES (@UserId, @FunctionId)";
+                    foreach (string functionName in selectedFunctionNames)
+                    {
+                        int functionId = GetFunctionIdByName(functionName, connection);
+                        if (functionId > 0)
+                        {
+                            using (MySqlCommand insertCommand = new MySqlCommand(insertQuery, connection))
+                            {
+                                insertCommand.Parameters.AddWithValue("@UserId", userId);
+                                insertCommand.Parameters.AddWithValue("@FunctionId", functionId);
+                                insertCommand.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                }
+            }
+
+            private int GetUserIdByUsername(string username, MySqlConnection connection)
+            {
+                string query = "SELECT id FROM Users WHERE login = @Username";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    object result = command.ExecuteScalar();
+                    if (result != null && int.TryParse(result.ToString(), out int userId))
+                    {
+                        return userId;
+                    }
+                }
+                return -1;
+            }
+
+            private int GetFunctionIdByName(string functionName, MySqlConnection connection)
+            {
+                string query = "SELECT id FROM `Function` WHERE name = @FunctionName";
+                using (MySqlCommand command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@FunctionName", functionName);
+                    object result = command.ExecuteScalar();
+                    if (result != null && int.TryParse(result.ToString(), out int functionId))
+                    {
+                        return functionId;
+                    }
+                }
+                return -1;
             }
         }
     }

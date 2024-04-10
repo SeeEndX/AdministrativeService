@@ -35,7 +35,19 @@ namespace AdminService
         void UpdatePass(int userId, string newPassword);
 
         [OperationContract]
-        List<string> GetFunctions(int userId, string newPassword);
+        List<string> GetFunctions();
+
+        [OperationContract]
+        bool IsUserExists(string login);
+
+        [OperationContract]
+        List<string> GetAllFunctionNames();
+
+        [OperationContract]
+        List<string> GetAssignedFunctionNames(string username);
+
+        [OperationContract]
+        void SaveAssignedFunctions(string username, List<string> selectedFunctionNames);
     }
 
     [DataContract]
