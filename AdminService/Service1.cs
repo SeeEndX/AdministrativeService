@@ -12,6 +12,7 @@ using Microsoft.Web.Administration; // Для работы с IIS
 using System.ServiceModel;
 using MySql.Data.MySqlClient;
 using System.Collections;
+using System.Transactions;
 
 
 namespace AdminService
@@ -172,10 +173,28 @@ namespace AdminService
                     using (MySqlConnection connection = new MySqlConnection(cs))
                     {
                         connection.Open();
-                        string query = "DELETE FROM Users WHERE username IN (@userId)";
-                        MySqlCommand command = new MySqlCommand(query, connection);
-                        command.Parameters.AddWithValue("@userId", string.Join(",", userId));
-                        command.ExecuteNonQuery();
+                        MySqlTransaction transaction = connection.BeginTransaction();
+
+                        try
+                        {
+                            string deleteRelatedQuery = "DELETE FROM function_users WHERE user = @userId";
+                            MySqlCommand deleteRelatedCommand = new MySqlCommand(deleteRelatedQuery, connection);
+                            deleteRelatedCommand.Parameters.AddWithValue("@userId", userId);
+                            deleteRelatedCommand.ExecuteNonQuery();
+
+                            string deleteUserQuery = "DELETE FROM Users WHERE id = @userId";
+                            MySqlCommand deleteUserCommand = new MySqlCommand(deleteUserQuery, connection);
+                            deleteUserCommand.Parameters.AddWithValue("@userId", userId);
+                            deleteUserCommand.ExecuteNonQuery();
+
+                            transaction.Commit();
+                        }
+                        catch
+                        {
+                            transaction.Rollback();
+                            throw;
+                        }
+
                         connection.Close();
                     }
                 }
