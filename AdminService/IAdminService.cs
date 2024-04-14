@@ -23,7 +23,7 @@ namespace AdminService
         int AddUser(string username, string password);
 
         [OperationContract]
-        void EditUser(string oldUsername, string newUsername);
+        int EditUser(string originalUsername, string newUsername, string newPassword);
 
         [OperationContract]
         void DeleteUser(int userId);

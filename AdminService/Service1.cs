@@ -135,35 +135,42 @@ namespace AdminService
                         }
                         connection.Close();
                         OnDataAdded();
-                        return userAdded;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Ошибка при добавлении пользователя: " + ex.Message);
-                    return 0;
                 }
+                return userAdded;
             }
 
-            public void EditUser(string oldUsername, string newUsername)
+            public int EditUser(string originalUsername, string newUsername, string newPassword)
             {
+                int rowsAffected = 0;
                 try
                 {
                     using (MySqlConnection connection = new MySqlConnection(cs))
                     {
                         connection.Open();
-                        string query = "UPDATE Users SET username = @NewUsername WHERE username = @OldUsername";
-                        MySqlCommand command = new MySqlCommand(query, connection);
-                        command.Parameters.AddWithValue("@NewUsername", newUsername);
-                        command.Parameters.AddWithValue("@OldUsername", oldUsername);
-                        command.ExecuteNonQuery();
-                        connection.Close();
+                        string updateQuery = @"
+                UPDATE Users
+                SET login = @NewUsername,
+                    password = @NewPassword
+                WHERE login = @OriginalUsername;";
+                        using (MySqlCommand command = new MySqlCommand(updateQuery, connection))
+                        {
+                            command.Parameters.AddWithValue("@NewUsername", newUsername);
+                            command.Parameters.AddWithValue("@NewPassword", newPassword);
+                            command.Parameters.AddWithValue("@OriginalUsername", originalUsername);
+                            rowsAffected = command.ExecuteNonQuery();
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Ошибка при редактировании пользователя: " + ex.Message);
+                    Console.WriteLine($"Ошибка при редактировании пользователя: {ex.Message}");
                 }
+                return rowsAffected;
             }
 
             public void DeleteUser(int userId)
