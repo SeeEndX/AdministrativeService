@@ -259,7 +259,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FunctionExecutor.cs" />
     <Compile Include="IAdminService.cs" />
+    <Compile Include="IISManager.cs" />
     <Compile Include="Service1.cs">
       <SubType>Component</SubType>
     </Compile>
