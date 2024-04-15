@@ -56,6 +56,7 @@ namespace AdminService
 
                     insertReportCmd.ExecuteNonQuery();
                 }
+                con.Close();
             }
         }
 
@@ -94,8 +95,8 @@ namespace AdminService
 
                 string query = @"
             SELECT f.name
-            FROM Function f
-            JOIN Function_users fu ON f.id = fu.function
+            FROM `Function` f
+            JOIN Function_users fu ON f.id = fu.`function`
             JOIN Users u ON u.id = fu.user
             WHERE u.login = @User;";
 

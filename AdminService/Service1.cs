@@ -46,11 +46,82 @@ namespace AdminService
             User user;
             private string cs = "server=localhost;user=root;database=admintooldb;password=1234;";
             public event EventHandler DataAdded;
+            private IISManager iisManager = new IISManager();
 
             protected virtual void OnDataAdded()
             {
                 DataAdded?.Invoke(this, EventArgs.Empty);
             }
+
+            //логика с IIS Manager
+            public List<IISManager.SiteInfo> GetListOfSites()
+            {
+                return iisManager.GetListOfSites();
+            }
+
+            public void AddReport(string currentUser, string description)
+            {
+                iisManager.AddReport(currentUser, description);
+                OnDataAdded();
+            }
+
+            public List<IISManager.AppPoolInfo> GetListOfAppPools()
+            {
+                return iisManager.GetListOfAppPools();
+            }
+
+            public void StartSite(string siteName)
+            {
+                iisManager.StartSite(siteName);
+            }
+
+            public void StopSite(string siteName)
+            {
+                iisManager.StopSite(siteName);
+            }
+
+            public void CreateWebsite(string siteName, string physicalPath, int port)
+            {
+                iisManager.CreateWebsite(siteName, physicalPath, port);
+            }
+
+            public void DeleteWebsite(string siteName)
+            {
+                iisManager?.DeleteWebsite(siteName);
+            }
+
+            public void ModifyWebsite(string currentSiteName, string newSiteName, string newPhysicalPath)
+            {
+                iisManager.ModifyWebsite(currentSiteName, newSiteName, newPhysicalPath);
+            }
+
+            public void CreatePool(string poolName, ManagedPipelineMode mode, int memoryLimit, int intervalMinutes)
+            {
+                iisManager.CreatePool(poolName, mode, memoryLimit, intervalMinutes);
+            }
+
+            public void DeletePool(string poolName)
+            {
+                iisManager.DeletePool(poolName);
+            }
+
+            public void ModifyPool(string currentPoolName, string newPoolName, ManagedPipelineMode mode, int memoryLimit, int intervalMinutes)
+            {
+                iisManager.ModifyPool(currentPoolName, newPoolName, mode, memoryLimit, intervalMinutes);
+            }
+
+            public void StartAppPool(string appPoolName)
+            {
+                iisManager.StartAppPool(appPoolName);
+            }
+
+            public void StopAppPool(string appPoolName)
+            {
+                iisManager.StopAppPool(appPoolName);
+            }
+
+
+            //логика с IIS Manager
 
             public User Authenticate(string login, string password)
             {
@@ -70,6 +141,56 @@ namespace AdminService
                     return user;
                 }
             }
+
+            public (List<string>, string) GetReportsForUser(int user)
+            {
+                List<string> reports = new List<string>();
+                string username = "";
+                try
+                {
+                    using (MySqlConnection con = new MySqlConnection(cs))
+                    {
+                        con.Open();
+
+                        string usernameQuery = "SELECT login FROM Users WHERE id = @UserId;";
+                        using (MySqlCommand usernameCmd = new MySqlCommand(usernameQuery, con))
+                        {
+                            usernameCmd.Parameters.AddWithValue("@UserId", user);
+                            username = (string)usernameCmd.ExecuteScalar();
+                        }
+
+                        string query = @"
+                SELECT U.login, R.description, R.time
+                FROM Reports R
+                JOIN Users U ON R.user = U.id
+                WHERE R.user = @UserId;";
+
+                        using (MySqlCommand cmd = new MySqlCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@UserId", user);
+
+                            using (MySqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                while (reader.Read())
+                                {
+                                    string login = reader.GetString(0);
+                                    string description = reader.GetString(1);
+                                    string time = reader.GetString(2);
+                                    string reportEntry = $"{description}\n в {time}\n\n";
+                                    reports.Add(reportEntry);
+                                    username = login;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //MessageBox.Show($"Ошибка при получении отчетов для пользователя: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return (reports, username);
+            }
+
             private string SqlQuery(string cmdText, MySqlConnection con)
             {
                 using (MySqlCommand cmd = new MySqlCommand(cmdText, con))
@@ -300,7 +421,7 @@ namespace AdminService
                     using (MySqlConnection con = new MySqlConnection(cs))
                     {
                         con.Open();
-                        string query = "SELECT name FROM Function;";
+                        string query = "SELECT name FROM `Function`;";
                         using (MySqlCommand cmd = new MySqlCommand(query, con))
                         {
                             using (MySqlDataReader reader = cmd.ExecuteReader())
