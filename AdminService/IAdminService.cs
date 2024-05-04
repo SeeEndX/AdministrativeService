@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Data;
 using Microsoft.Web.Administration;
+using System.Collections.ObjectModel;
 
 
 namespace AdminService
@@ -18,7 +19,10 @@ namespace AdminService
         User Authenticate(string login, string password);
 
         [OperationContract]
-        DataTable GetUsersData();
+        DataView GetUsersData();
+
+        [OperationContract]
+        ObservableCollection<User> GetUserData();
 
         [OperationContract]
         int AddUser(string username, string password);
@@ -96,6 +100,12 @@ namespace AdminService
     [DataContract]
     public class User
     {
+        [DataMember]
+        public int Id { get; set; }
+
+        [DataMember]
+        public string Functions { get; set; }
+
         [DataMember]
         public string Login { get; set; }
 

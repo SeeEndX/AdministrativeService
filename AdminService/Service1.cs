@@ -13,6 +13,8 @@ using System.ServiceModel;
 using MySql.Data.MySqlClient;
 using System.Collections;
 using System.Transactions;
+using System.Collections.ObjectModel;
+using System.CodeDom;
 
 
 namespace AdminService
@@ -201,16 +203,18 @@ namespace AdminService
                 }
             }
 
-            public DataTable GetUsersData()
+            public DataView GetUsersData()
             {
                 DataTable dataTable = new DataTable();
+
+                var users = new List<User>();
 
                 using (MySqlConnection connection = new MySqlConnection(cs))
                 {
                     string cmdText = @"
             SELECT Users.id AS `id`, 
 	            Users.login AS `Пользователь`, 
-                GROUP_CONCAT(DISTINCT `Function`.name SEPARATOR ', ') AS `Доступные функции`
+                GROUP_CONCAT(DISTINCT `Function`.name SEPARATOR ', ') AS `Доступные_функции`
             FROM Users
             LEFT JOIN Function_users ON Users.id = Function_users.user
             LEFT JOIN `Function` ON `Function`.id = Function_users.function
@@ -234,7 +238,53 @@ namespace AdminService
                     }
                 }
 
-                return dataTable;
+                return dataTable.DefaultView;
+            }
+
+            public ObservableCollection<User> GetUserData()
+            {
+                var users = new ObservableCollection<User>();
+
+                using (MySqlConnection connection = new MySqlConnection(cs))
+                {
+                    string cmdText = @"
+SELECT Users.id AS `id`, 
+    Users.login AS `Пользователь`, 
+    GROUP_CONCAT(DISTINCT `Function`.name SEPARATOR ', ') AS `Доступные функции`
+FROM Users
+LEFT JOIN Function_users ON Users.id = Function_users.user
+LEFT JOIN `Function` ON `Function`.id = Function_users.function
+WHERE Users.usergroup = 'Dev'
+GROUP BY Users.id;";
+
+                    using (MySqlCommand cmd = new MySqlCommand(cmdText, connection))
+                    {
+                        try
+                        {
+                            connection.Open();
+                            using (MySqlDataReader reader = cmd.ExecuteReader())
+                            {
+                                var dt = new DataTable();
+                                dt.Load(reader);
+                                foreach (DataRow row in dt.Rows)
+                                {
+                                    users.Add(new User
+                                    {
+                                        Id = Convert.ToInt32(row["id"]),
+                                        Login = Convert.ToString(row["Пользователь"]),
+                                        Functions = Convert.ToString(row["Доступные функции"])
+                                    });
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Ошибка при выполнении запроса: " + ex.Message);
+                        }
+                    }
+                }
+
+                return users;
             }
 
             public int AddUser(string username, string password)
