@@ -462,38 +462,6 @@ GROUP BY Users.id;";
                 return userCount > 0;
             }
 
-            public List<string> GetFunctions()
-            {
-                List<string> allFunctions = new List<string>();
-
-                try
-                {
-                    using (MySqlConnection con = new MySqlConnection(cs))
-                    {
-                        con.Open();
-                        string query = "SELECT name FROM `Function`;";
-                        using (MySqlCommand cmd = new MySqlCommand(query, con))
-                        {
-                            using (MySqlDataReader reader = cmd.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    string functionName = reader.GetString(0);
-                                    allFunctions.Add(functionName);
-                                }
-                            }
-                        }
-                        con.Close();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Ошибка - ", ex.Message);
-                }
-
-                return allFunctions;
-            }
-
             public List<string> GetAllFunctionNames()
             {
                 List<string> allFunctionNames = new List<string>();

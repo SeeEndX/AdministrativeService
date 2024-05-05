@@ -40,9 +40,6 @@ namespace AdminService
         void UpdatePass(int userId, string newPassword);
 
         [OperationContract]
-        List<string> GetFunctions();
-
-        [OperationContract]
         bool IsUserExists(string login);
 
         [OperationContract]
