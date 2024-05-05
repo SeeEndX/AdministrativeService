@@ -344,6 +344,32 @@ GROUP BY Users.id;";
                 return rowsAffected;
             }
 
+            public string GetPasswordByUsername(string username)
+            {
+                string password = null;
+
+                using (MySqlConnection connection = new MySqlConnection(cs))
+                {
+                    connection.Open();
+                    string query = "SELECT password FROM users WHERE login = @username";
+
+                    using (MySqlCommand command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@username", username);
+                        using (MySqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                password = reader["password"].ToString();
+                            }
+                        }
+                    }
+                }
+
+                return password;
+            }
+
+
             public void DeleteUser(int userId)
             {
                 try

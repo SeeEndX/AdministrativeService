@@ -37,6 +37,9 @@ namespace AdminService
         int GetSelectedUserId(string newUsername);
 
         [OperationContract]
+        string GetPasswordByUsername(string username);
+
+        [OperationContract]
         void UpdatePass(int userId, string newPassword);
 
         [OperationContract]
