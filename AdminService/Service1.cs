@@ -178,7 +178,7 @@ namespace AdminService
                                     string login = reader.GetString(0);
                                     string description = reader.GetString(1);
                                     string time = reader.GetString(2);
-                                    string reportEntry = $"{description}\n в {time}\n\n";
+                                    string reportEntry = $"{description} в {time}\n";
                                     reports.Add(reportEntry);
                                     username = login;
                                 }
