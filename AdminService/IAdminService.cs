@@ -64,7 +64,7 @@ namespace AdminService
         List<IISManager.AppPoolInfo> GetListOfAppPools();
 
         [OperationContract]
-        void StartSite(string siteName);
+        string StartSite(string siteName);
 
         [OperationContract]
         void StopSite(string siteName);

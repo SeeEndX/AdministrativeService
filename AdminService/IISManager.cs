@@ -180,21 +180,38 @@ namespace AdminService
             return sites;
         }
 
-        public void StartSite(string siteName)
+        public string StartSite(string siteName)
         {
+            var result = "";
             using (ServerManager serverManager = new ServerManager())
             {
-                Site site = serverManager.Sites[siteName];
+                Site siteToStart = serverManager.Sites[siteName];
 
-                if (site != null)
+                if (siteToStart != null)
                 {
-                    if (site.State == ObjectState.Stopped)
+                    string siteToStartPort = siteToStart.Bindings[0].EndPoint.Port.ToString();
+
+                    foreach (Site site in serverManager.Sites)
                     {
-                        site.Start();
+                        if (site.Name != siteName && site.State == ObjectState.Started)
+                        {
+                            string sitePort = site.Bindings[0].EndPoint.Port.ToString();
+                            if (sitePort == siteToStartPort)
+                            {
+                                result = "Порт уже занят другим сайтом";
+                                return result;
+                            }
+                        }
+                    }
+
+                    if (siteToStart.State == ObjectState.Stopped)
+                    {
+                        siteToStart.Start();
                         serverManager.CommitChanges();
                     }
                 }
             }
+            return result;
         }
 
         public void StopSite(string siteName)

@@ -72,9 +72,10 @@ namespace AdminService
                 return iisManager.GetListOfAppPools();
             }
 
-            public void StartSite(string siteName)
+            public string StartSite(string siteName)
             {
-                iisManager.StartSite(siteName);
+                var res = iisManager.StartSite(siteName);
+                return res;
             }
 
             public void StopSite(string siteName)
