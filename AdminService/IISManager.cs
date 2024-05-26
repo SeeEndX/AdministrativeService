@@ -372,6 +372,51 @@ namespace AdminService
             }
         }
 
+        //ДЛЯ БУДУЩЕЙ РЕАЛИЗАЦИИ
+        /*public void ConfigureCompressionSettings(bool enableStatic, bool enableDynamic)
+        {
+            using (ServerManager serverManager = new ServerManager())
+            {
+                Configuration config = serverManager.GetApplicationHostConfiguration();
+
+                ConfigurationSection staticCompressionSection = config.GetSection("system.webServer/httpCompression/staticCompression");
+                staticCompressionSection["enabled"] = enableStatic;
+
+                ConfigurationSection dynamicCompressionSection = config.GetSection("system.webServer/httpCompression/dynamicCompression");
+                dynamicCompressionSection["enabled"] = enableDynamic;
+
+                serverManager.CommitChanges();
+            }
+        }
+
+        public void EnableServerLogging(bool isLoggingEnabled)
+        {
+            using (ServerManager serverManager = new ServerManager())
+            {
+                Configuration config = serverManager.GetApplicationHostConfiguration();
+                ConfigurationSection httpLoggingSection = config.GetSection("system.webServer/httpLogging");
+                if (isLoggingEnabled) httpLoggingSection["dontLog"] = false;
+                else httpLoggingSection["dontLog"] = true;
+                serverManager.CommitChanges();
+            }
+        }
+
+        public void ConfigureLogSettings(string logFilePath, string logFormat, bool isLoggingEnabled)
+        {
+            using (ServerManager serverManager = new ServerManager())
+            {
+                Configuration config = serverManager.GetApplicationHostConfiguration();
+
+                ConfigurationSection logFileSection = config.GetSection("system.applicationHost/log");
+                logFileSection["directory"] = logFilePath;
+                logFileSection["logFormat"] = logFormat;
+
+                serverManager.CommitChanges();
+                serverManager.Dispose();
+            }
+            EnableServerLogging(isLoggingEnabled);
+        }*/
+
         public void StartAppPool(string appPoolName)
         {
             try

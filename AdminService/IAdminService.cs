@@ -95,6 +95,13 @@ namespace AdminService
 
         [OperationContract]
         void AddReport(string currentUser, string description);
+
+        //ДЛЯ БУДУЩЕЙ РЕАЛИЗАЦИИ
+        /*[OperationContract]
+        void ConfigureCompression(bool enableStatic, bool enableDynamic);
+
+        [OperationContract]
+        void ConfigureLog(string logFilePath, string logFormat, bool isLoggingEnabled);*/
     }
 
     [DataContract]

@@ -123,6 +123,17 @@ namespace AdminService
                 iisManager.StopAppPool(appPoolName);
             }
 
+            ////ДЛЯ БУДУЩЕЙ РЕАЛИЗАЦИИ
+            /*public void ConfigureCompression(bool enableStatic, bool enableDynamic)
+            {
+                iisManager.ConfigureCompressionSettings(enableStatic, enableDynamic);
+            }
+            
+            public void ConfigureLog(string logFilePath, string logFormat, bool isLoggingEnabled)
+            {
+                iisManager.ConfigureLogSettings( logFilePath, logFormat, isLoggingEnabled);
+            }*/
+            
 
             //логика с IIS Manager
 
