@@ -14,7 +14,8 @@ namespace AdminService
         {
             functionDictionary = dictionary;
         }
-
+        
+        //функция запуска функции по имени
         public void ExecuteMethodByName(string methodName)
         {
             if (functionDictionary.TryGetValue(methodName, out Action action))

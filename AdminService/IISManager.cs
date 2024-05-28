@@ -11,9 +11,10 @@ namespace AdminService
 {
     public class IISManager
     {
-        private string cs = "server=localhost;user=root;database=admintooldb;password=1234;";
+        private string cs = "server=localhost;user=root;database=admintooldb;password=1234;"; //строка подключения к БД
         FunctionExecutor executor;
 
+        //класс информации о сайте
         public class SiteInfo
         {
             public string Name { get; set; }
@@ -21,6 +22,7 @@ namespace AdminService
             public string Bindings { get; set; }
         }
 
+        //класс информации о пулах приложений
         public class AppPoolInfo
         {
             public string Name { get; set; }
@@ -29,6 +31,7 @@ namespace AdminService
             public string ManagedPipelineMode { get; set; }
         }
 
+        //класс о функциях для пользователей (веб-разработчиков)
         public class ActionItem
         {
             public string Name { get; }
@@ -41,9 +44,10 @@ namespace AdminService
             }
         }
 
+        //метод создания отчетов о действиях пользователя
         public void AddReport(string currentUser, string description)
         {
-            using (MySqlConnection con = new MySqlConnection(cs))
+            using (MySqlConnection con = new MySqlConnection(cs)) //инициализация подключения
             {
                 con.Open();
 
@@ -60,6 +64,7 @@ namespace AdminService
             }
         }
 
+        //получение ид пользователя по логину
         private int GetUserIdByUsername(string username)
         {
             int userId = -1;
@@ -85,6 +90,7 @@ namespace AdminService
             return userId;
         }
 
+        //получение списка функций по логину пользователя
         public List<ActionItem> GetFunctionsForUser(string user)
         {
             List<ActionItem> functions = new List<ActionItem>();
@@ -119,6 +125,7 @@ namespace AdminService
             return functions;
         }
 
+        //получение списка пулов приложений IIS
         public List<AppPoolInfo> GetListOfAppPools()
         {
             List<AppPoolInfo> appPools = new List<AppPoolInfo>();
@@ -149,6 +156,7 @@ namespace AdminService
             return appPools;
         }
 
+        //получение списка сайтов IIS
         public List<SiteInfo> GetListOfSites()
         {
             List<SiteInfo> sites = new List<SiteInfo>();
@@ -180,6 +188,7 @@ namespace AdminService
             return sites;
         }
 
+        //метод запуска сайта IIS
         public string StartSite(string siteName)
         {
             var result = "";
@@ -214,6 +223,7 @@ namespace AdminService
             return result;
         }
 
+        //метод остановки сайта IIS
         public void StopSite(string siteName)
         {
             using (ServerManager serverManager = new ServerManager())
@@ -235,6 +245,7 @@ namespace AdminService
             }
         }
 
+        //метод создания сайта IIS
         public void CreateWebsite(string siteName, string physicalPath, int port)
         {
             try
@@ -251,6 +262,7 @@ namespace AdminService
             }
         }
 
+        //метод удаления сайта IIS
         public void DeleteWebsite(string siteName)
         {
             try
@@ -271,6 +283,7 @@ namespace AdminService
             }
         }
 
+        //метод редактирования сайта IIS
         public void ModifyWebsite(string currentSiteName, string newSiteName, string newPhysicalPath)
         {
             try
@@ -297,6 +310,7 @@ namespace AdminService
             }
         }
 
+        //метод создания пула IIS
         public void CreatePool(string poolName, ManagedPipelineMode mode, int memoryLimit, int intervalMinutes)
         {
             try
@@ -320,6 +334,7 @@ namespace AdminService
             }
         }
 
+        //метод удаления пула IIS
         public void DeletePool(string poolName)
         {
             try
@@ -340,6 +355,7 @@ namespace AdminService
             }
         }
 
+        //метод редактирования пула IIS
         public void ModifyPool(string currentPoolName, string newPoolName, ManagedPipelineMode mode, int memoryLimit, int intervalMinutes)
         {
             try
@@ -417,6 +433,7 @@ namespace AdminService
             EnableServerLogging(isLoggingEnabled);
         }*/
 
+        //метод запуска пула IIS
         public void StartAppPool(string appPoolName)
         {
             try
@@ -450,6 +467,7 @@ namespace AdminService
             }
         }
 
+        //метод остановки пула IIS
         public void StopAppPool(string appPoolName)
         {
             try

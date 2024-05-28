@@ -12,9 +12,11 @@ using System.Collections.ObjectModel;
 
 namespace AdminService
 {
+    //интерфейс для служебного приложения
     [ServiceContract]
     public interface IAdminService
     {
+        //ниже приведены методы, используемые в интерфейсе
         [OperationContract]
         User Authenticate(string login, string password);
 
@@ -104,6 +106,7 @@ namespace AdminService
         void ConfigureLog(string logFilePath, string logFormat, bool isLoggingEnabled);*/
     }
 
+    //класс пользователя
     [DataContract]
     public class User
     {
