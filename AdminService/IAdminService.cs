@@ -21,9 +21,6 @@ namespace AdminService
         User Authenticate(string login, string password);
 
         [OperationContract]
-        DataView GetUsersData();
-
-        [OperationContract]
         ObservableCollection<User> GetUserData();
 
         [OperationContract]

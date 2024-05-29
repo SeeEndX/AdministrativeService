@@ -215,44 +215,6 @@ namespace AdminService
                 }
             }
 
-            public DataView GetUsersData()
-            {
-                DataTable dataTable = new DataTable();
-
-                var users = new List<User>();
-
-                using (MySqlConnection connection = new MySqlConnection(cs))
-                {
-                    string cmdText = @"
-            SELECT Users.id AS `id`, 
-	            Users.login AS `Пользователь`, 
-                GROUP_CONCAT(DISTINCT `Function`.name SEPARATOR ', ') AS `Доступные_функции`
-            FROM Users
-            LEFT JOIN Function_users ON Users.id = Function_users.user
-            LEFT JOIN `Function` ON `Function`.id = Function_users.function
-            WHERE Users.usergroup = 'Dev'
-            GROUP BY Users.id;";
-
-                    using (MySqlCommand cmd = new MySqlCommand(cmdText, connection))
-                    {
-                        try
-                        {
-                            connection.Open();
-                            using (MySqlDataReader reader = cmd.ExecuteReader())
-                            {
-                                dataTable.Load(reader);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Ошибка при выполнении запроса: " + ex.Message);
-                        }
-                    }
-                }
-
-                return dataTable.DefaultView;
-            }
-
             public ObservableCollection<User> GetUserData()
             {
                 var users = new ObservableCollection<User>();

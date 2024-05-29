@@ -65,7 +65,7 @@ namespace AdminService
         }
 
         //получение ид пользователя по логину
-        private int GetUserIdByUsername(string username)
+        public int GetUserIdByUsername(string username)
         {
             int userId = -1;
 
